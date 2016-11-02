@@ -280,15 +280,15 @@ public final class FusumaViewController: UIViewController {
 
         UIGraphicsBeginImageContextWithOptions(view.frame.size, true, 0)
         let context = UIGraphicsGetCurrentContext()
-        CGContextTranslateCTM(context, -albumView.imageCropView.contentOffset.x, -albumView.imageCropView.contentOffset.y)
+        CGContextTranslateCTM(context!, -albumView.imageCropView.contentOffset.x, -albumView.imageCropView.contentOffset.y)
         view.drawViewHierarchyInRect(view.bounds, afterScreenUpdates: false)
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
-        delegate?.fusumaImageSelected(image)
+        delegate?.fusumaImageSelected(image!)
         
         self.dismissViewControllerAnimated(true, completion: {
-            self.delegate?.fusumaDismissedWithImage?(image)
+            self.delegate?.fusumaDismissedWithImage?(image!)
         })
 
         if fusumaCropImage {
@@ -335,7 +335,6 @@ public final class FusumaViewController: UIViewController {
                 self.delegate?.fusumaDismissedWithImage?(view.image)
             })
         }
->>>>>>> .merge_file_2De72F
     }
     
 }
