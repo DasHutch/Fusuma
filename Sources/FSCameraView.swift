@@ -19,6 +19,8 @@ final class FSCameraView: UIView, UIGestureRecognizerDelegate {
     @IBOutlet weak var shotButton: UIButton!
     @IBOutlet weak var flashButton: UIButton!
     @IBOutlet weak var flipButton: UIButton!
+    @IBOutlet weak var croppedAspectRatioConstraint: NSLayoutConstraint!
+    @IBOutlet weak var fullAspectRatioConstraint: NSLayoutConstraint!
     
     weak var delegate: FSCameraViewDelegate? = nil
     
@@ -103,6 +105,8 @@ final class FSCameraView: UIView, UIGestureRecognizerDelegate {
                 
                 self.previewViewContainer.layer.addSublayer(videoLayer)
                 
+                session.sessionPreset = AVCaptureSessionPresetPhoto
+
                 session.startRunning()
                 
             }
@@ -171,17 +175,41 @@ final class FSCameraView: UIView, UIGestureRecognizerDelegate {
 
             let videoConnection = imageOutput.connectionWithMediaType(AVMediaTypeVideo)
 
+            let orientation: UIDeviceOrientation = UIDevice.currentDevice().orientation
+            switch (orientation) {
+            case .Portrait:
+                videoConnection.videoOrientation = .Portrait
+            case .PortraitUpsideDown:
+                videoConnection.videoOrientation = .PortraitUpsideDown
+            case .LandscapeRight:
+                videoConnection.videoOrientation = .LandscapeLeft
+            case .LandscapeLeft:
+                videoConnection.videoOrientation = .LandscapeRight
+            default:
+                videoConnection.videoOrientation = .Portrait
+            }
+
             imageOutput.captureStillImageAsynchronouslyFromConnection(videoConnection, completionHandler: { (buffer, error) -> Void in
                 
                 self.session?.stopRunning()
                 
                 let data = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(buffer)
                 
-                if let image = UIImage(data: data), let delegate = self.delegate {
+                if let image = UIImage(data: data), let cgImage = image.CGImage, let delegate = self.delegate {
                     
                     // Image size
-                    let iw = image.size.width
-                    let ih = image.size.height
+                    var iw: CGFloat
+                    var ih: CGFloat
+
+                    switch (orientation) {
+                    case .LandscapeLeft, .LandscapeRight:
+                        // Swap width and height if orientation is landscape
+                        iw = image.size.height
+                        ih = image.size.width
+                    default:
+                        iw = image.size.width
+                        ih = image.size.height
+                    }
                     
                     // Frame size
                     let sw = self.previewViewContainer.frame.width
@@ -189,13 +217,17 @@ final class FSCameraView: UIView, UIGestureRecognizerDelegate {
                     // The center coordinate along Y axis
                     let rcy = ih * 0.5
 
-                    let imageRef = CGImageCreateWithImageInRect(image.CGImage, CGRect(x: rcy-iw*0.5, y: 0 , width: iw, height: iw))
+                    let imageRef = CGImageCreateWithImageInRect(cgImage, CGRect(x: rcy-iw*0.5, y: 0 , width: iw, height: iw))
                     
-                    let resizedImage = UIImage(CGImage: imageRef!, scale: sw/iw, orientation: image.imageOrientation)
+                    
                                         
                     dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                        
-                        delegate.cameraShotFinished(resizedImage)
+                        if fusumaCropImage {
+                            let resizedImage = UIImage(CGImage: imageRef!, scale: sw/iw, orientation: image.imageOrientation)
+                            delegate.cameraShotFinished(resizedImage)
+                        } else {
+                            delegate.cameraShotFinished(image)
+                        }
                         
                         self.session     = nil
                         self.device      = nil
@@ -278,7 +310,7 @@ final class FSCameraView: UIView, UIGestureRecognizerDelegate {
                 } else if mode == AVCaptureFlashMode.On {
                     
                     device.flashMode = AVCaptureFlashMode.Off
-                    flashButton.setImage(fusumaFlashOffImage, forState: .Normal)
+                    flashButton.setImage(flashOffImage, forState: .Normal)
                 }
                 
                 device.unlockForConfiguration()
@@ -287,7 +319,7 @@ final class FSCameraView: UIView, UIGestureRecognizerDelegate {
 
         } catch _ {
 
-            flashButton.setImage(fusumaFlashOffImage, forState: .Normal)
+            flashButton.setImage(flashOffImage, forState: .Normal)
             return
         }
  
@@ -357,7 +389,7 @@ extension FSCameraView {
                 try device.lockForConfiguration()
                 
                 device.flashMode = AVCaptureFlashMode.Off
-                flashButton.setImage(fusumaFlashOffImage, forState: .Normal)
+                flashButton.setImage(flashOffImage, forState: .Normal)
                 
                 device.unlockForConfiguration()
                 

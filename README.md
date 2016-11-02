@@ -19,24 +19,27 @@ You can use Fusuma instead of UIImagePickerController. It also has a feature to 
 ## Features
 - [x] UIImagePickerController alternative
 - [x] Cropping images in camera roll
-- [x] Taking a square-sized photo using AVFoundation
+- [x] Taking a square-sized photo and a video using AVFoundation
 - [x] Flash: On Off 
 - [x] Camera Mode: Front Back 
+- [x] Video Mode 
 
 Those features are available just with a few lines of code!
 
 ## Installation
 
-Drop in the Classes folder to your Xcode project.  
-You can also use cocoapods or Carthage.
+#### This branch supports Swift2.3. Go to the master branch if you use Swift3.
 
-#### Using [cocoapods](http://cocoapods.org/)
+Drop in the Classes folder to your Xcode project.  
+You can also use CocoaPods or Carthage.
+
+#### Using [CocoaPods](http://cocoapods.org/)
 
 Add `pod 'Fusuma'` to your `Podfile` and run `pod install`. Also add `use_frameworks!` to the `Podfile`.
 
 ```
 use_frameworks!
-pod 'Fusuma'
+pod 'Fusuma', '0.6.0'
 ```
 
 #### Using [Carthage](https://github.com/Carthage/Carthage)
@@ -44,7 +47,7 @@ pod 'Fusuma'
 Add `github "ytakzk/Fusuma"` to your `Cartfile` and run `carthage update`. If unfamiliar with Carthage then checkout their [Getting Started section](https://github.com/Carthage/Carthage#getting-started).
 
 ```
-github "ytakzk/Fusuma"
+github "ytakzk/Fusuma" "swift2.3"
 ```
 
 ## Fusuma Usage
@@ -53,6 +56,7 @@ Import Fusuma ```import Fusuma``` then use the following codes in some function 
 ```Swift
 let fusuma = FusumaViewController()
 fusuma.delegate = self
+fusuma.hasVideo = true // If you want to let the users allow to use video.
 self.presentViewController(fusuma, animated: true, completion: nil)
 ```
 
@@ -71,6 +75,11 @@ func fusumaDismissedWithImage(image: UIImage) {
   print("Called just after FusumaViewController is dismissed.")
 }
 
+func fusumaVideoCompleted(withFileURL fileURL: NSURL) {
+
+  print("Called just after a video has been selected.")
+}
+
 // When camera roll is not authorized, this method is called.
 func fusumaCameraRollUnauthorized() {
 
@@ -85,6 +94,17 @@ fusumaTintColor: UIColor // tint color
 
 fusumaBackgroundColor: UIColor // background color
 ```
+
+#### Customize Image Output 
+You can deselect image crop mode with: 
+
+```Swift
+fusumaCropImage:Bool // default is true for cropping the image 
+```
+
+## Fusuma for Xamarin
+Cheesebaron developed Chafu for Xamarin.  
+https://github.com/Cheesebaron/Chafu
 
 ## Author
 ytakzk  
