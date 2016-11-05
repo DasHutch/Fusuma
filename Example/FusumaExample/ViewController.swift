@@ -36,6 +36,11 @@ class ViewController: UIViewController, FusumaDelegate {
 //        fusumaCropImage = false
         
         fusuma.delegate = self
+
+        fusuma.hasVideo = true
+        fusuma.hasAlbumPermissions = true
+        fusuma.hasCameraPermissions = true
+
         self.presentViewController(fusuma, animated: true, completion: nil)
         
     }

@@ -31,11 +31,36 @@ internal extension UIColor {
 extension UIView {
     
     func addBottomBorder(color: UIColor, width: CGFloat) {
-        let border = CALayer()
-        border.borderColor = color.CGColor
-        border.frame = CGRect(x: 0, y: self.frame.size.height - width, width:  self.frame.size.width, height: width)
-        border.borderWidth = width
-        self.layer.addSublayer(border)
-    }
+        let border = UIView()
+        border.backgroundColor = color
 
+        addSubview(border)
+
+        border.backgroundColor = color
+        border.translatesAutoresizingMaskIntoConstraints = false
+        border.addConstraint(NSLayoutConstraint(item: border,
+            attribute: .Height,
+            relatedBy: .Equal,
+            toItem: nil,
+            attribute: .Height,
+            multiplier: 1, constant: 3))
+        addConstraint(NSLayoutConstraint(item: border,
+            attribute: .Bottom,
+            relatedBy: .Equal,
+            toItem: self,
+            attribute: .Bottom,
+            multiplier: 1, constant: 0))
+        addConstraint(NSLayoutConstraint(item: border,
+            attribute: .Leading,
+            relatedBy: .Equal,
+            toItem: self,
+            attribute: .Leading,
+            multiplier: 1, constant: 0))
+        addConstraint(NSLayoutConstraint(item: border,
+            attribute: .Trailing,
+            relatedBy: .Equal,
+            toItem: self,
+            attribute: .Trailing,
+            multiplier: 1, constant: 0))
+    }
 }
